@@ -279,3 +279,9 @@ export const avaliacoes: { anterior: Avaliacao; atual: Avaliacao } = {
   ]
 },
 };
+
+// Meta de peso definida pelo aluno, exibida em destaque no comparativo.
+export const meta = {
+  pesoKg: 60,
+  prazo: "Janeiro de 2027",
+} as const;

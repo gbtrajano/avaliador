@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { avaliacoes, aluno, type Avaliacao } from "./data";
+import { avaliacoes, aluno, meta, type Avaliacao } from "./data";
 import { CartaoDataAnterior } from "./_components/modal-avaliacao";
 import { Badge } from "./_components/badge";
 import { Secao } from "./_components/secao";
@@ -95,6 +95,80 @@ function corDelta(d: number): string {
 
 function textoCorDelta(d: number): string {
   return d > 0 ? "text-emerald-600" : d < 0 ? "text-rose-600" : "text-slate-400";
+}
+
+function CartaoMeta({
+  pesoInicial,
+  pesoAtual,
+}: {
+  pesoInicial: number;
+  pesoAtual: number;
+}) {
+  const falta = meta.pesoKg - pesoAtual;
+  const total = meta.pesoKg - pesoInicial;
+  const progresso =
+    total > 0
+      ? Math.min(100, Math.max(0, ((pesoAtual - pesoInicial) / total) * 100))
+      : 100;
+
+  return (
+    <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 p-4 text-white shadow-md sm:p-5 print:break-inside-avoid">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        <div className="flex items-center gap-3">
+          <span
+            aria-hidden
+            className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/15 text-xl ring-1 ring-white/30 sm:size-11 sm:text-2xl"
+          >
+            🎯
+          </span>
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-100 sm:text-xs">
+              Meta de peso
+            </p>
+            <p className="text-xl font-bold leading-tight tabular-nums sm:text-2xl">
+              {nf(1).format(meta.pesoKg)} kg{" "}
+              <span className="text-sm font-medium tabular-nums text-emerald-100 sm:text-base">
+                até {meta.prazo}
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className="rounded-xl bg-white/15 px-3.5 py-1.5 text-right ring-1 ring-white/30">
+          <p className="text-[11px] font-medium text-emerald-100">
+            {falta > 0 ? "Faltam" : "Diferença"}
+          </p>
+          <p className="text-base font-bold tabular-nums sm:text-lg">
+            {falta > 0
+              ? `${nf(1).format(falta)} kg`
+              : `${nf(1).format(Math.abs(falta))} kg ${falta < 0 ? "abaixo" : ""} 🎉`}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3.5">
+        <div
+          role="progressbar"
+          aria-valuenow={Math.round(progresso)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Progresso de ${nf(1).format(pesoInicial)} kg até a meta de ${nf(1).format(meta.pesoKg)} kg`}
+          className="h-2.5 overflow-hidden rounded-full bg-white/20"
+        >
+          <div
+            className="h-full rounded-full bg-white transition-all"
+            style={{ width: `${progresso}%` }}
+          />
+        </div>
+        <div className="mt-1.5 flex justify-between gap-2 text-[11px] font-medium tabular-nums text-emerald-100 sm:text-xs">
+          <span>{nf(1).format(pesoInicial)} kg · início</span>
+          <span className="font-bold text-white">
+            {nf(1).format(pesoAtual)} kg · {Math.round(progresso)}%
+          </span>
+          <span>{nf(1).format(meta.pesoKg)} kg · meta</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function CartaoDestaque({
@@ -266,6 +340,14 @@ export default function Page() {
           </div>
         </div>
       </header>
+
+      {/* Meta */}
+      <div className="mt-4 sm:mt-6">
+        <CartaoMeta
+          pesoInicial={a.composicao.pesoKg}
+          pesoAtual={b.composicao.pesoKg}
+        />
+      </div>
 
       {/* Destaques */}
       <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-6 sm:gap-4 lg:grid-cols-4">
