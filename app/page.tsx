@@ -3,6 +3,7 @@ import { avaliacoes, aluno, meta, type Avaliacao } from "./data";
 import { CartaoDataAnterior } from "./_components/modal-avaliacao";
 import { Badge } from "./_components/badge";
 import { Secao } from "./_components/secao";
+import { Info, PartyPopper, Target } from "lucide-react";
 import { nf, dataLabel, delta } from "./_lib/formato";
 
 export const metadata: Metadata = {
@@ -128,10 +129,11 @@ function CartaoMeta({
         : "Etapa concluída";
   const chipValor =
     faltaFinal <= 0
-      ? "Atingida 🎉"
+      ? "Atingida"
       : faltaEtapa > 0
         ? `${nf(1).format(faltaEtapa)} kg`
-        : "✓ 🎉";
+        : "✓";
+  const comemora = faltaFinal <= 0 || faltaEtapa <= 0;
 
   return (
     <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 p-4 text-white shadow-md sm:p-5 print:break-inside-avoid">
@@ -139,9 +141,9 @@ function CartaoMeta({
         <div className="flex items-center gap-3">
           <span
             aria-hidden
-            className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/15 text-xl ring-1 ring-white/30 sm:size-11 sm:text-2xl"
+            className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/15 ring-1 ring-white/30 sm:size-11"
           >
-            🎯
+            <Target className="size-6 text-white sm:size-7" strokeWidth={2} />
           </span>
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-100 sm:text-xs">
@@ -162,8 +164,11 @@ function CartaoMeta({
           <p className="text-[11px] font-medium text-emerald-100">
             {chipRotulo}
           </p>
-          <p className="text-base font-bold tabular-nums sm:text-lg">
+          <p className="flex items-center justify-end gap-1 text-base font-bold tabular-nums sm:text-lg">
             {chipValor}
+            {comemora ? (
+              <PartyPopper aria-hidden className="size-4 sm:size-5" />
+            ) : null}
           </p>
         </div>
       </div>
@@ -553,16 +558,19 @@ export default function Page() {
             </table>
           </div>
 
-          <p className="mt-3 rounded-lg bg-sky-50 px-3 py-2 text-xs leading-relaxed text-sky-800 ring-1 ring-sky-200">
-            ℹ️ Na avaliação de {dataAnterior}, o avaliador registrou cintura,
-            abdômen e quadril em <strong>polegadas</strong> (28″, 28″ e 31″) —
-            os valores já foram <strong>convertidos para centímetros</strong>{" "}
-            (× 2,54) nesta página para permitir a comparação direta. Já o
-            peitoral daquela data (40) não é confiável — não se sabe em que
-            unidade foi anotado — e, como houve ganho de peitoral no período,
-            ele aparece como <strong>não disponível (—)</strong>. Confirme os
-            dois casos com o avaliador.
-          </p>
+          <div className="mt-3 flex gap-2 rounded-lg bg-sky-50 px-3 py-2 text-xs leading-relaxed text-sky-800 ring-1 ring-sky-200">
+            <Info aria-hidden className="mt-0.5 size-4 shrink-0 text-sky-600" />
+            <p>
+              Na avaliação de {dataAnterior}, o avaliador registrou cintura,
+              abdômen e quadril em <strong>polegadas</strong> (28″, 28″ e 31″) —
+              os valores já foram <strong>convertidos para centímetros</strong>{" "}
+              (× 2,54) nesta página para permitir a comparação direta. Já o
+              peitoral daquela data (40) não é confiável — não se sabe em que
+              unidade foi anotado — e, como houve ganho de peitoral no período,
+              ele aparece como <strong>não disponível (—)</strong>. Confirme os
+              dois casos com o avaliador.
+            </p>
+          </div>
         </Secao>
       </div>
 
