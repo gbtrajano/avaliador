@@ -3,7 +3,7 @@ import { avaliacoes, aluno, meta, type Avaliacao } from "./data";
 import { CartaoDataAnterior } from "./_components/modal-avaliacao";
 import { Badge } from "./_components/badge";
 import { Secao } from "./_components/secao";
-import { Info, PartyPopper, Target } from "lucide-react";
+import { PartyPopper, Target } from "lucide-react";
 import { nf, dataLabel, delta } from "./_lib/formato";
 
 export const metadata: Metadata = {
@@ -558,19 +558,6 @@ export default function Page() {
             </table>
           </div>
 
-          <div className="mt-3 flex gap-2 rounded-lg bg-sky-50 px-3 py-2 text-xs leading-relaxed text-sky-800 ring-1 ring-sky-200">
-            <Info aria-hidden className="mt-0.5 size-4 shrink-0 text-sky-600" />
-            <p>
-              Na avaliação de {dataAnterior}, o avaliador registrou cintura,
-              abdômen e quadril em <strong>polegadas</strong> (28″, 28″ e 31″) —
-              os valores já foram <strong>convertidos para centímetros</strong>{" "}
-              (× 2,54) nesta página para permitir a comparação direta. Já o
-              peitoral daquela data (40) não é confiável — não se sabe em que
-              unidade foi anotado — e, como houve ganho de peitoral no período,
-              ele aparece como <strong>não disponível (—)</strong>. Confirme os
-              dois casos com o avaliador.
-            </p>
-          </div>
         </Secao>
       </div>
 
@@ -599,39 +586,6 @@ export default function Page() {
               </div>
             ))}
           </dl>
-        </Secao>
-      </div>
-
-      {/* Observações */}
-      <div className="mt-4 sm:mt-6">
-        <Secao titulo="Observações">
-          <ul className="list-inside list-disc space-y-1.5 text-sm text-slate-600">
-            <li>
-              Altura registrada: {nf(2).format(a.alturaM)} m →{" "}
-              {nf(2).format(b.alturaM)} m (provável variação de aferição).
-            </li>
-            <li>
-              Na avaliação de {dataAnterior}, cintura, abdômen e quadril foram
-              registrados em polegadas e{" "}
-              <strong>convertidos para centímetros</strong> (× 2,54) nesta
-              página. O peitoral daquela data está <strong>incerto</strong>{" "}
-              (unidade desconhecida) e por isso aparece como não disponível —
-              ver nota na seção de perímetros.
-            </li>
-            <li>
-              Composição corporal estimada por protocolo de dobras cutâneas nas
-              duas avaliações.
-            </li>
-            <li>
-              As fotos e imagens das avaliações foram{" "}
-              <strong>intencionalmente omitidas</strong> deste documento, a
-              pedido do aluno.
-            </li>
-            <li>
-              Nenhuma medida ou dado de contato (telefone, e-mail, CPF) é
-              exibido além do necessário.
-            </li>
-          </ul>
         </Secao>
       </div>
 
