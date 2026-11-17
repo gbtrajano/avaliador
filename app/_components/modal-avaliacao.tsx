@@ -15,7 +15,7 @@ function Linha({
   classe?: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-2">
+    <div className="flex justify-between gap-3 py-2">
       <dt className="text-sm text-slate-500">{rotulo}</dt>
       <dd className="flex items-center gap-2 text-right text-sm font-semibold tabular-nums text-slate-900">
         {valor}
@@ -70,31 +70,40 @@ function ModalAvaliacao({
     },
   ];
 
+  const temTroncoSuspeito = Object.entries(avaliacao.perimetros).some(
+    ([chave, valor]) => TRONCO_SUSPEITO.has(chave) && valor < 60,
+  );
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+      className="animar-backdrop fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 backdrop-blur-sm sm:items-center sm:p-4"
       onClick={aoFechar}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={`Dados completos da avaliação de ${data}`}
-        className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        className="animar-modal flex h-[88dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:h-auto sm:max-h-[90vh] sm:max-w-2xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Alça arrastável (mobile) */}
+        <div className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-slate-200 sm:hidden" />
+
         {/* Cabeçalho do modal */}
-        <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
-              Dados completos da avaliação
+        <div className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-100 px-4 py-3 sm:px-5 sm:py-4">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600 sm:text-xs">
+              Dados completos
             </p>
-            <h3 className="text-lg font-bold text-slate-900">{data}</h3>
+            <h3 className="truncate text-base font-bold text-slate-900 sm:text-lg">
+              Avaliação de {data}
+            </h3>
           </div>
           <button
             type="button"
             onClick={aoFechar}
             aria-label="Fechar"
-            className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className="shrink-0 rounded-full p-2.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
           >
             <svg
               width="18"
@@ -111,8 +120,8 @@ function ModalAvaliacao({
         </div>
 
         {/* Conteúdo rolável */}
-        <div className="overflow-y-auto px-5 py-4">
-          <p className="mb-3 text-sm text-slate-500">
+        <div className="overflow-y-auto overscroll-contain px-4 py-4 sm:px-5">
+          <p className="mb-3 text-xs text-slate-500 sm:text-sm">
             {avaliacao.idade} anos · altura {nf(2).format(avaliacao.alturaM)} m
           </p>
 
@@ -136,7 +145,10 @@ function ModalAvaliacao({
                 key={chave}
                 className="rounded-lg bg-slate-50 px-3 py-2 ring-1 ring-slate-100"
               >
-                <p className="text-[11px] font-medium text-slate-500">
+                <p
+                  className="truncate text-[11px] font-medium text-slate-500"
+                  title={chave}
+                >
                   {chave}
                   {TRONCO_SUSPEITO.has(chave) && valor < 60 ? (
                     <span
@@ -153,9 +165,7 @@ function ModalAvaliacao({
               </div>
             ))}
           </div>
-          {Object.entries(avaliacao.perimetros).some(
-            ([chave, valor]) => TRONCO_SUSPEITO.has(chave) && valor < 60,
-          ) ? (
+          {temTroncoSuspeito ? (
             <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800 ring-1 ring-amber-200">
               * Medidas de peitoral, cintura, abdômen e quadril aparentam ter
               sido registradas em <strong>polegadas</strong> nesta avaliação.
@@ -164,13 +174,9 @@ function ModalAvaliacao({
 
           {/* Anamnese */}
           <h4 className="mt-5 text-sm font-bold text-slate-900">Hábitos</h4>
-          <dl className="mt-1 divide-y divide-slate-100">
+          <dl className="mt-1 divide-y divide-slate-100 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
             {avaliacao.anamnese.map((item, i) => (
-              <Linha
-                key={i}
-                rotulo={item.pergunta}
-                valor={item.resposta}
-              />
+              <Linha key={i} rotulo={item.pergunta} valor={item.resposta} />
             ))}
           </dl>
         </div>
@@ -203,22 +209,22 @@ export function CartaoDataAnterior({ avaliacao }: { avaliacao: Avaliacao }) {
         onClick={() => setAberto(true)}
         aria-haspopup="dialog"
         title="Clique para ver todos os dados desta avaliação"
-        className="group rounded-xl bg-white/10 px-4 py-2.5 text-left ring-1 ring-white/20 transition hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+        className="group min-w-0 rounded-xl bg-white/10 px-3.5 py-2.5 text-left ring-1 ring-white/20 transition hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 active:bg-white/25 sm:px-4"
       >
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-300">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-300 sm:text-[11px]">
           Avaliação anterior
         </p>
         <p className="text-lg font-bold tabular-nums text-white">
           {dataLabel(avaliacao.dataISO)}
           <span
             aria-hidden
-            className="ml-2 inline-block text-emerald-300 opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100"
+            className="ml-2 inline-block text-emerald-300 transition group-hover:translate-x-0.5"
           >
             ↗
           </span>
         </p>
         <p className="mt-0.5 text-[10px] font-medium text-emerald-300/90">
-          Clique para ver os dados completos
+          Toque para ver os dados
         </p>
       </button>
 

@@ -12,9 +12,49 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* Remove o flash cinza ao tocar em botões/links no iOS e Android */
+button,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Animações do modal (bottom sheet no mobile) */
+@keyframes modal-subir {
+  from {
+    transform: translateY(28px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes modal-aparecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animar-modal {
+  animation: modal-subir 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animar-backdrop {
+  animation: modal-aparecer 0.18s ease-out;
 }
 
 @media print {

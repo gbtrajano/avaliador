@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 
 type LinhaComposicao = {
   rotulo: string;
+  rotuloMobile?: string;
   dec: number;
   unidade: string;
   valor: (a: Avaliacao) => number;
@@ -36,6 +37,7 @@ const LINHAS_COMPOSICAO: LinhaComposicao[] = [
   },
   {
     rotulo: "Gordura corporal",
+    rotuloMobile: "Gordura corporal (%)",
     dec: 2,
     unidade: "%",
     valor: (a) => a.composicao.gorduraPercentual,
@@ -43,24 +45,28 @@ const LINHAS_COMPOSICAO: LinhaComposicao[] = [
   },
   {
     rotulo: "Gordura corporal",
+    rotuloMobile: "Gordura corporal (kg)",
     dec: 2,
     unidade: "kg",
     valor: (a) => a.composicao.gorduraKg,
   },
   {
     rotulo: "Massa magra",
+    rotuloMobile: "Massa magra (%)",
     dec: 2,
     unidade: "%",
     valor: (a) => a.composicao.massaMagraPercentual,
   },
   {
     rotulo: "Massa magra",
+    rotuloMobile: "Massa magra (kg)",
     dec: 2,
     unidade: "kg",
     valor: (a) => a.composicao.massaMagraKg,
   },
   {
     rotulo: "RCQ (relação cintura/quadril)",
+    rotuloMobile: "RCQ (cintura/quadril)",
     dec: 2,
     unidade: "",
     valor: (a) => a.composicao.rcq,
@@ -68,11 +74,28 @@ const LINHAS_COMPOSICAO: LinhaComposicao[] = [
   },
   {
     rotulo: "Metabolismo basal sugerido",
+    rotuloMobile: "Metabolismo basal (sugerido)",
     dec: 0,
     unidade: "kcal",
     valor: (a) => a.composicao.metabolismoBasalSugeridoKcal,
   },
 ];
+
+const COR_DELTA_POSITIVO = "bg-emerald-50 text-emerald-700 ring-emerald-200";
+const COR_DELTA_NEGATIVO = "bg-rose-50 text-rose-700 ring-rose-200";
+const COR_DELTA_NEUTRO = "bg-slate-100 text-slate-500 ring-slate-200";
+
+function corDelta(d: number): string {
+  return d > 0
+    ? COR_DELTA_POSITIVO
+    : d < 0
+      ? COR_DELTA_NEGATIVO
+      : COR_DELTA_NEUTRO;
+}
+
+function textoCorDelta(d: number): string {
+  return d > 0 ? "text-emerald-600" : d < 0 ? "text-rose-600" : "text-slate-400";
+}
 
 function CartaoDestaque({
   rotulo,
@@ -96,27 +119,114 @@ function CartaoDestaque({
       ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
       : "bg-amber-50 text-amber-700 ring-amber-200";
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 print:break-inside-avoid">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <div className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:p-4 print:break-inside-avoid">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 sm:text-xs">
         {rotulo}
       </p>
-      <p className="mt-1.5 text-2xl font-bold tabular-nums text-slate-900">
+      <p className="mt-1 text-xl font-bold tabular-nums text-slate-900 sm:mt-1.5 sm:text-2xl">
         {depois}
         {unidade ? (
-          <span className="ml-1 text-sm font-medium text-slate-400">
+          <span className="ml-1 text-xs font-medium text-slate-400 sm:text-sm">
             {unidade}
           </span>
         ) : null}
       </p>
-      <div className="mt-2 flex items-center gap-2">
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 sm:mt-2">
         <span
-          className={`inline-block rounded-full px-2 py-0.5 text-xs font-bold ring-1 ${corTom}`}
+          className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 sm:text-xs ${corTom}`}
         >
           {deltaTexto}
         </span>
-        <span className="text-xs text-slate-500">de {antes}</span>
+        <span className="text-[11px] text-slate-500 sm:text-xs">de {antes}</span>
       </div>
-      {detalhe ? <p className="mt-1.5 text-xs text-slate-500">{detalhe}</p> : null}
+      {detalhe ? (
+        <p className="mt-1 text-[11px] leading-snug text-slate-500 sm:text-xs">
+          {detalhe}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function CartaoComposicaoMobile({ linha }: { linha: LinhaComposicao }) {
+  const antes = linha.valor(avaliacoes.anterior);
+  const depois = linha.valor(avaliacoes.atual);
+  const clsAtual = linha.classificacao?.(avaliacoes.atual);
+  const clsAnterior = linha.classificacao?.(avaliacoes.anterior);
+  const deltaTxt = `${delta(antes, depois, linha.dec)}${linha.unidade ? ` ${linha.unidade}` : ""}`;
+  const valorComUnidade = (v: number) =>
+    linha.unidade ? `${nf(linha.dec).format(v)} ${linha.unidade}` : nf(linha.dec).format(v);
+
+  return (
+    <div className="rounded-xl bg-slate-50 px-3.5 py-3 ring-1 ring-slate-100">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-semibold text-slate-900">
+          {linha.rotuloMobile ?? linha.rotulo}
+        </span>
+        {clsAtual ? <Badge texto={clsAtual} /> : null}
+      </div>
+      <div className="mt-1.5 flex items-center justify-between gap-2">
+        <p className="text-sm tabular-nums text-slate-500">
+          {valorComUnidade(antes)}
+          <span className="mx-1 text-slate-400">→</span>
+          <span className="text-base font-bold text-slate-900">
+            {valorComUnidade(depois)}
+          </span>
+        </p>
+        <span
+          className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ring-1 ${corDelta(depois - antes)}`}
+        >
+          {deltaTxt}
+        </span>
+      </div>
+      {clsAnterior && clsAnterior !== clsAtual ? (
+        <p className="mt-1 text-[11px] text-slate-400">
+          antes: {clsAnterior}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function TilePerimetroMobile({
+  chave,
+  antes,
+  depois,
+}: {
+  chave: string;
+  antes: number | undefined;
+  depois: number | undefined;
+}) {
+  const suspeito = antes != null && TRONCO_SUSPEITO.has(chave) && antes < 60;
+  return (
+    <div className="rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-100">
+      <p className="truncate text-[11px] font-medium text-slate-500" title={chave}>
+        {chave}
+        {suspeito ? (
+          <span
+            className="ml-1 font-bold text-amber-600"
+            title="Valor possivelmente registrado em polegadas"
+          >
+            *
+          </span>
+        ) : null}
+      </p>
+      <div className="mt-1 flex items-end justify-between gap-1.5">
+        <p className="text-lg font-bold leading-none tabular-nums text-slate-900">
+          {depois != null ? nf(1).format(depois) : "—"}
+          <span className="ml-0.5 text-[10px] font-medium text-slate-400">cm</span>
+        </p>
+        {antes != null && depois != null ? (
+          <span
+            className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums ring-1 ${corDelta(depois - antes)}`}
+          >
+            {delta(antes, depois, 1)}
+          </span>
+        ) : null}
+      </div>
+      <p className="mt-1 text-[11px] tabular-nums text-slate-400">
+        antes: {antes != null ? nf(1).format(antes) : "—"} cm
+      </p>
     </div>
   );
 }
@@ -132,22 +242,24 @@ export default function Page() {
   );
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6">
+    <main className="mx-auto w-full max-w-4xl flex-1 px-3 py-5 sm:px-6 sm:py-8">
       {/* Cabeçalho */}
-      <header className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 p-6 text-white shadow-md print:bg-slate-900">
+      <header className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 p-4 text-white shadow-md sm:p-6 print:bg-slate-900">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-300">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-300 sm:text-xs">
             Comparativo de avaliações físicas
           </p>
-          <h1 className="mt-1 text-2xl font-bold sm:text-3xl">{aluno.nome}</h1>
-          <p className="mt-1 text-sm text-slate-300">
+          <h1 className="mt-1 text-xl font-bold sm:text-2xl md:text-3xl">
+            {aluno.nome}
+          </h1>
+          <p className="mt-1 text-xs text-slate-300 sm:text-sm">
             {aluno.unidade} · {aluno.sexo} · {b.idade} anos
           </p>
         </div>
-        <div className="mt-5 flex flex-wrap gap-3">
+        <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:flex sm:flex-wrap sm:gap-3">
           <CartaoDataAnterior avaliacao={a} />
-          <div className="rounded-xl bg-emerald-500/20 px-4 py-2.5 ring-1 ring-emerald-400/40">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-200">
+          <div className="min-w-0 rounded-xl bg-emerald-500/20 px-3.5 py-2.5 ring-1 ring-emerald-400/40 sm:px-4">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-200 sm:text-[11px]">
               Avaliação atual
             </p>
             <p className="text-lg font-bold tabular-nums">{dataAtual}</p>
@@ -156,7 +268,7 @@ export default function Page() {
       </header>
 
       {/* Destaques */}
-      <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-6 sm:gap-4 lg:grid-cols-4">
         <CartaoDestaque
           rotulo="Peso"
           antes={`${nf(1).format(a.composicao.pesoKg)} kg`}
@@ -172,7 +284,7 @@ export default function Page() {
           deltaTexto={`${delta(a.composicao.massaMagraKg, b.composicao.massaMagraKg, 2)} kg`}
           tom="positivo"
           unidade="kg"
-          detalhe={`${nf(2).format(a.composicao.massaMagraPercentual)}% → ${nf(2).format(b.composicao.massaMagraPercentual)}% do peso`}
+          detalhe={`${nf(2).format(a.composicao.massaMagraPercentual)}% → ${nf(2).format(b.composicao.massaMagraPercentual)}%`}
         />
         <CartaoDestaque
           rotulo="Gordura corporal"
@@ -180,7 +292,7 @@ export default function Page() {
           depois={`${nf(2).format(b.composicao.gorduraPercentual)}%`}
           deltaTexto={`${delta(a.composicao.gorduraPercentual, b.composicao.gorduraPercentual, 2)} p.p.`}
           tom="atencao"
-          detalhe={`${nf(2).format(a.composicao.gorduraKg)} kg → ${nf(2).format(b.composicao.gorduraKg)} kg`}
+          detalhe={`${nf(2).format(a.composicao.gorduraKg)} → ${nf(2).format(b.composicao.gorduraKg)} kg`}
         />
         <CartaoDestaque
           rotulo="IMC"
@@ -188,17 +300,25 @@ export default function Page() {
           depois={nf(2).format(b.composicao.imc)}
           deltaTexto={delta(a.composicao.imc, b.composicao.imc, 2)}
           tom="positivo"
-          detalhe={`${a.composicao.classificacaoImc} → ${b.composicao.classificacaoImc}`}
+          detalhe={b.composicao.classificacaoImc}
         />
       </div>
 
       {/* Composição corporal */}
-      <div className="mt-6">
+      <div className="mt-4 sm:mt-6">
         <Secao
           titulo="Composição corporal"
-          descricao={`Protocolo: dobras cutâneas · comparativo ${dataAnterior} → ${dataAtual}`}
+          descricao={`Dobras cutâneas · ${dataAnterior} → ${dataAtual}`}
         >
-          <div className="overflow-x-auto">
+          {/* Mobile: cards empilhados */}
+          <div className="grid gap-2.5 sm:hidden">
+            {LINHAS_COMPOSICAO.map((linha, i) => (
+              <CartaoComposicaoMobile key={i} linha={linha} />
+            ))}
+          </div>
+
+          {/* Tela grande: tabela */}
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
@@ -221,7 +341,9 @@ export default function Page() {
                   const clsAnterior = linha.classificacao?.(a);
                   const deltaTxt = `${delta(antes, depois, linha.dec)}${linha.unidade ? ` ${linha.unidade}` : ""}`;
                   const unidadeCelula = (v: number) =>
-                    linha.unidade ? `${nf(linha.dec).format(v)} ${linha.unidade}` : nf(linha.dec).format(v);
+                    linha.unidade
+                      ? `${nf(linha.dec).format(v)} ${linha.unidade}`
+                      : nf(linha.dec).format(v);
                   return (
                     <tr key={i} className="text-slate-700">
                       <td className="py-2.5 pr-3 font-medium text-slate-900">
@@ -234,13 +356,7 @@ export default function Page() {
                         {unidadeCelula(depois)}
                       </td>
                       <td
-                        className={`py-2.5 pr-3 text-right font-semibold tabular-nums ${
-                          depois - antes > 0
-                            ? "text-emerald-600"
-                            : depois - antes < 0
-                              ? "text-rose-600"
-                              : "text-slate-400"
-                        }`}
+                        className={`py-2.5 pr-3 text-right font-semibold tabular-nums ${textoCorDelta(depois - antes)}`}
                       >
                         {deltaTxt}
                       </td>
@@ -262,12 +378,25 @@ export default function Page() {
       </div>
 
       {/* Perímetros */}
-      <div className="mt-6">
+      <div className="mt-4 sm:mt-6">
         <Secao
-          titulo="Perímetros (circunferências)"
-          descricao={`Valores em centímetros · comparativo ${dataAnterior} → ${dataAtual}`}
+          titulo="Perímetros"
+          descricao={`Circunferências em centímetros · ${dataAnterior} → ${dataAtual}`}
         >
-          <div className="overflow-x-auto">
+          {/* Mobile: grade de tiles */}
+          <div className="grid grid-cols-2 gap-2.5 sm:hidden">
+            {chavesPerimetros.map((chave) => (
+              <TilePerimetroMobile
+                key={chave}
+                chave={chave}
+                antes={a.perimetros[chave]}
+                depois={b.perimetros[chave]}
+              />
+            ))}
+          </div>
+
+          {/* Tela grande: tabela */}
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
@@ -308,11 +437,9 @@ export default function Page() {
                       </td>
                       <td
                         className={`py-2.5 text-right font-semibold tabular-nums ${
-                          antes != null && depois != null && depois - antes > 0
-                            ? "text-emerald-600"
-                            : antes != null && depois != null && depois - antes < 0
-                              ? "text-rose-600"
-                              : "text-slate-400"
+                          antes != null && depois != null
+                            ? textoCorDelta(depois - antes)
+                            : "text-slate-400"
                         }`}
                       >
                         {antes != null && depois != null
@@ -325,6 +452,7 @@ export default function Page() {
               </tbody>
             </table>
           </div>
+
           <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800 ring-1 ring-amber-200">
             * Na avaliação de {dataAnterior}, as medidas de peitoral, cintura,
             abdômen e quadril aparentam ter sido registradas em{" "}
@@ -337,13 +465,13 @@ export default function Page() {
       </div>
 
       {/* Anamnese */}
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
+      <div className="mt-4 grid gap-4 sm:mt-6 sm:grid-cols-2">
         <Secao titulo={`Hábitos — ${dataAnterior}`}>
-          <dl className="space-y-1.5 text-sm">
+          <dl className="divide-y divide-slate-100">
             {a.anamnese.map((item, i) => (
-              <div key={i} className="flex justify-between gap-4">
-                <dt className="text-slate-500">{item.pergunta}</dt>
-                <dd className="text-right font-semibold text-slate-800">
+              <div key={i} className="flex justify-between gap-3 py-2">
+                <dt className="text-sm text-slate-500">{item.pergunta}</dt>
+                <dd className="text-right text-sm font-semibold text-slate-800">
                   {item.resposta}
                 </dd>
               </div>
@@ -351,11 +479,11 @@ export default function Page() {
           </dl>
         </Secao>
         <Secao titulo={`Hábitos — ${dataAtual}`}>
-          <dl className="space-y-1.5 text-sm">
+          <dl className="divide-y divide-slate-100">
             {b.anamnese.map((item, i) => (
-              <div key={i} className="flex justify-between gap-4">
-                <dt className="text-slate-500">{item.pergunta}</dt>
-                <dd className="text-right font-semibold text-slate-800">
+              <div key={i} className="flex justify-between gap-3 py-2">
+                <dt className="text-sm text-slate-500">{item.pergunta}</dt>
+                <dd className="text-right text-sm font-semibold text-slate-800">
                   {item.resposta}
                 </dd>
               </div>
@@ -365,7 +493,7 @@ export default function Page() {
       </div>
 
       {/* Observações */}
-      <div className="mt-6">
+      <div className="mt-4 sm:mt-6">
         <Secao titulo="Observações">
           <ul className="list-inside list-disc space-y-1.5 text-sm text-slate-600">
             <li>
@@ -389,7 +517,7 @@ export default function Page() {
         </Secao>
       </div>
 
-      <footer className="mt-8 pb-4 text-center text-xs text-slate-400 print:hidden">
+      <footer className="mt-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center text-[11px] leading-relaxed text-slate-400 sm:mt-8 sm:text-xs print:hidden">
         Documento comparativo gerado a partir das avaliações físicas do NextFit
         ({aluno.unidade}) · {dataAnterior} e {dataAtual}
       </footer>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   title: "Comparativo de Avaliações Físicas",
   description:
     "Comparativo entre duas avaliações físicas — apenas medidas numéricas, sem fotos. Pronto para compartilhar com a nutrição.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f172a",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
