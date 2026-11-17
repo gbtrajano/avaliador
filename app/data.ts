@@ -25,7 +25,7 @@ export type Avaliacao = {
     classificacaoRcq: string;
     metabolismoBasalSugeridoKcal: number;
   };
-  perimetros: Record<string, number>;
+  perimetros: Record<string, number | null>;
   anamnese: AnamneseItem[];
 };
 
@@ -55,10 +55,18 @@ export const avaliacoes: { anterior: Avaliacao; atual: Avaliacao } = {
     "metabolismoBasalSugeridoKcal": 1513.27
   },
   "perimetros": {
-    "Peitoral": 40.0,
-    "Cintura": 28.0,
-    "Abdômen": 28.0,
-    "Quadril": 31.0,
+    // Peitoral: o valor registrado (40) não é confiável — não se sabe a unidade
+    // (40 cm é pequeno demais; 40″ = 101,6 cm mostraria uma perda que não
+    // aconteceu, pois houve GANHO de peitoral no período). Tratado como
+    // desconhecido (null) para não exibir uma comparação enganosa.
+    "Peitoral": null,
+    // Cintura, abdômen e quadril foram registrados em POLEGADAS pelo avaliador
+    // nesta avaliação (ex.: cintura 28″ ≈ 71 cm, coerente com os 70 cm da
+    // avaliação de nov/2026). Valores abaixo já CONVERTIDOS para cm (× 2,54):
+    // originais: cintura 28″, abdômen 28″, quadril 31″.
+    "Cintura": 71.1,
+    "Abdômen": 71.1,
+    "Quadril": 78.7,
     "Braço relaxado (D)": 24.0,
     "Braço relaxado (E)": 24.0,
     "Braço contraído (D)": 28.0,

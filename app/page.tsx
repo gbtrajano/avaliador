@@ -3,7 +3,7 @@ import { avaliacoes, aluno, meta, type Avaliacao } from "./data";
 import { CartaoDataAnterior } from "./_components/modal-avaliacao";
 import { Badge } from "./_components/badge";
 import { Secao } from "./_components/secao";
-import { nf, dataLabel, delta, TRONCO_SUSPEITO } from "./_lib/formato";
+import { nf, dataLabel, delta } from "./_lib/formato";
 
 export const metadata: Metadata = {
   title: "Comparativo de Avaliações Físicas",
@@ -305,22 +305,13 @@ function TilePerimetroMobile({
   depois,
 }: {
   chave: string;
-  antes: number | undefined;
-  depois: number | undefined;
+  antes: number | null | undefined;
+  depois: number | null | undefined;
 }) {
-  const suspeito = antes != null && TRONCO_SUSPEITO.has(chave) && antes < 60;
   return (
     <div className="rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-100">
       <p className="truncate text-[11px] font-medium text-slate-500" title={chave}>
         {chave}
-        {suspeito ? (
-          <span
-            className="ml-1 font-bold text-amber-600"
-            title="Valor possivelmente registrado em polegadas"
-          >
-            *
-          </span>
-        ) : null}
       </p>
       <div className="mt-1 flex items-end justify-between gap-1.5">
         <p className="text-lg font-bold leading-none tabular-nums text-slate-900">
@@ -533,20 +524,10 @@ export default function Page() {
                 {chavesPerimetros.map((chave) => {
                   const antes = a.perimetros[chave];
                   const depois = b.perimetros[chave];
-                  const suspeito =
-                    antes != null && TRONCO_SUSPEITO.has(chave) && antes < 60;
                   return (
                     <tr key={chave} className="text-slate-700">
                       <td className="py-2.5 pr-3 font-medium text-slate-900">
                         {chave}
-                        {suspeito ? (
-                          <span
-                            className="ml-1 font-bold text-amber-600"
-                            title="Valor possivelmente registrado em polegadas"
-                          >
-                            *
-                          </span>
-                        ) : null}
                       </td>
                       <td className="py-2.5 pr-3 text-right tabular-nums">
                         {antes != null ? nf(1).format(antes) : "—"}
@@ -572,13 +553,15 @@ export default function Page() {
             </table>
           </div>
 
-          <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800 ring-1 ring-amber-200">
-            * Na avaliação de {dataAnterior}, as medidas de peitoral, cintura,
-            abdômen e quadril aparentam ter sido registradas em{" "}
-            <strong>polegadas</strong> pelo avaliador (ex.: cintura 28″ ≈ 71 cm,
-            coerente com os 70 cm de {dataAtual}). As demais medidas estão em
-            centímetros nas duas avaliações. Recomenda-se confirmar com o
-            avaliador antes de usar esses quatro valores.
+          <p className="mt-3 rounded-lg bg-sky-50 px-3 py-2 text-xs leading-relaxed text-sky-800 ring-1 ring-sky-200">
+            ℹ️ Na avaliação de {dataAnterior}, o avaliador registrou cintura,
+            abdômen e quadril em <strong>polegadas</strong> (28″, 28″ e 31″) —
+            os valores já foram <strong>convertidos para centímetros</strong>{" "}
+            (× 2,54) nesta página para permitir a comparação direta. Já o
+            peitoral daquela data (40) não é confiável — não se sabe em que
+            unidade foi anotado — e, como houve ganho de peitoral no período,
+            ele aparece como <strong>não disponível (—)</strong>. Confirme os
+            dois casos com o avaliador.
           </p>
         </Secao>
       </div>
@@ -618,6 +601,14 @@ export default function Page() {
             <li>
               Altura registrada: {nf(2).format(a.alturaM)} m →{" "}
               {nf(2).format(b.alturaM)} m (provável variação de aferição).
+            </li>
+            <li>
+              Na avaliação de {dataAnterior}, cintura, abdômen e quadril foram
+              registrados em polegadas e{" "}
+              <strong>convertidos para centímetros</strong> (× 2,54) nesta
+              página. O peitoral daquela data está <strong>incerto</strong>{" "}
+              (unidade desconhecida) e por isso aparece como não disponível —
+              ver nota na seção de perímetros.
             </li>
             <li>
               Composição corporal estimada por protocolo de dobras cutâneas nas

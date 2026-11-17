@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Avaliacao } from "../data";
-import { nf, dataLabel, TRONCO_SUSPEITO } from "../_lib/formato";
+import { avaliacoes, type Avaliacao } from "../data";
+import { nf, dataLabel } from "../_lib/formato";
 import { Badge } from "./badge";
 
 function Linha({
@@ -70,10 +70,6 @@ function ModalAvaliacao({
     },
   ];
 
-  const temTroncoSuspeito = Object.entries(avaliacao.perimetros).some(
-    ([chave, valor]) => TRONCO_SUSPEITO.has(chave) && valor < 60,
-  );
-
   return (
     <div
       className="animar-backdrop fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 backdrop-blur-sm sm:items-center sm:p-4"
@@ -139,6 +135,15 @@ function ModalAvaliacao({
           <h4 className="mt-5 text-sm font-bold text-slate-900">
             Perímetros (cm)
           </h4>
+          {avaliacao === avaliacoes.anterior ? (
+            <p className="mt-1 rounded-lg bg-sky-50 px-3 py-2 text-[11px] leading-relaxed text-sky-800 ring-1 ring-sky-200">
+              ℹ️ Cintura, abdômen e quadril foram registrados em polegadas nesta
+              avaliação e já aparecem{" "}
+              <strong>convertidos para centímetros</strong> (× 2,54). O peitoral
+              registrado (40) não é confiável — unidade desconhecida — e por
+              isso aparece como —.
+            </p>
+          ) : null}
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {Object.entries(avaliacao.perimetros).map(([chave, valor]) => (
               <div
@@ -150,30 +155,14 @@ function ModalAvaliacao({
                   title={chave}
                 >
                   {chave}
-                  {TRONCO_SUSPEITO.has(chave) && valor < 60 ? (
-                    <span
-                      className="ml-1 font-bold text-amber-600"
-                      title="Valor possivelmente registrado em polegadas"
-                    >
-                      *
-                    </span>
-                  ) : null}
                 </p>
                 <p className="text-sm font-bold tabular-nums text-slate-900">
-                  {nf(1).format(valor)}
+                  {valor != null ? nf(1).format(valor) : "—"}
                 </p>
               </div>
             ))}
           </div>
-          {temTroncoSuspeito ? (
-            <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800 ring-1 ring-amber-200">
-              * Medidas de peitoral, cintura, abdômen e quadril aparentam ter
-              sido registradas em <strong>polegadas</strong> nesta avaliação.
-            </p>
-          ) : null}
-
-          {/* Anamnese */}
-          <h4 className="mt-5 text-sm font-bold text-slate-900">Hábitos</h4>
+          {/* Anamnese */}          <h4 className="mt-5 text-sm font-bold text-slate-900">Hábitos</h4>
           <dl className="mt-1 divide-y divide-slate-100 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
             {avaliacao.anamnese.map((item, i) => (
               <Linha key={i} rotulo={item.pergunta} valor={item.resposta} />

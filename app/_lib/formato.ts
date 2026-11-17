@@ -23,11 +23,3 @@ export const COR_BADGE: Record<string, string> = {
   Alto: "bg-rose-100 text-rose-800 ring-rose-200",
   Acima: "bg-rose-100 text-rose-800 ring-rose-200",
 };
-
-// Medidas de tronco da avaliação antiga que aparentam ter sido anotadas em polegadas
-export const TRONCO_SUSPEITO = new Set([
-  "Peitoral",
-  "Cintura",
-  "Abdômen",
-  "Quadril",
-]);
