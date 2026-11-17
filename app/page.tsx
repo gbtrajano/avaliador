@@ -104,12 +104,34 @@ function CartaoMeta({
   pesoInicial: number;
   pesoAtual: number;
 }) {
-  const falta = meta.pesoKg - pesoAtual;
-  const total = meta.pesoKg - pesoInicial;
+  const etapa = meta.intermediaria;
+  const metaFinalKg = meta.principal.pesoKg;
+
+  const total = metaFinalKg - pesoInicial;
+  const faltaEtapa = etapa.pesoKg - pesoAtual;
+  const faltaFinal = metaFinalKg - pesoAtual;
+
   const progresso =
     total > 0
       ? Math.min(100, Math.max(0, ((pesoAtual - pesoInicial) / total) * 100))
       : 100;
+  const marcadorEtapa =
+    total > 0
+      ? Math.min(100, Math.max(0, ((etapa.pesoKg - pesoInicial) / total) * 100))
+      : 0;
+
+  const chipRotulo =
+    faltaFinal <= 0
+      ? "Meta final"
+      : faltaEtapa > 0
+        ? `Faltam · ${etapa.prazoCurto}`
+        : "Etapa concluída";
+  const chipValor =
+    faltaFinal <= 0
+      ? "Atingida 🎉"
+      : faltaEtapa > 0
+        ? `${nf(1).format(faltaEtapa)} kg`
+        : "✓ 🎉";
 
   return (
     <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 p-4 text-white shadow-md sm:p-5 print:break-inside-avoid">
@@ -123,40 +145,55 @@ function CartaoMeta({
           </span>
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-100 sm:text-xs">
-              Meta de peso
+              Metas de peso
             </p>
             <p className="text-xl font-bold leading-tight tabular-nums sm:text-2xl">
-              {nf(1).format(meta.pesoKg)} kg{" "}
-              <span className="text-sm font-medium tabular-nums text-emerald-100 sm:text-base">
-                até {meta.prazo}
+              {nf(1).format(metaFinalKg)} kg{" "}
+              <span className="text-sm font-medium text-emerald-100 sm:text-base">
+                meta principal final
               </span>
+            </p>
+            <p className="mt-0.5 text-xs text-emerald-100 sm:text-sm">
+              Etapa: {nf(1).format(etapa.pesoKg)} kg até {etapa.prazo}
             </p>
           </div>
         </div>
         <div className="rounded-xl bg-white/15 px-3.5 py-1.5 text-right ring-1 ring-white/30">
           <p className="text-[11px] font-medium text-emerald-100">
-            {falta > 0 ? "Faltam" : "Diferença"}
+            {chipRotulo}
           </p>
           <p className="text-base font-bold tabular-nums sm:text-lg">
-            {falta > 0
-              ? `${nf(1).format(falta)} kg`
-              : `${nf(1).format(Math.abs(falta))} kg ${falta < 0 ? "abaixo" : ""} 🎉`}
+            {chipValor}
           </p>
         </div>
       </div>
 
-      <div className="mt-3.5">
+      <div className="mt-4">
+        {/* Rótulo da etapa intermediária acima da barra */}
+        <div className="relative h-4">
+          <span
+            className="absolute top-0 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold tabular-nums text-emerald-100 sm:text-[11px]"
+            style={{ left: `${marcadorEtapa}%` }}
+          >
+            {nf(1).format(etapa.pesoKg)} kg · {etapa.prazoCurto} ▾
+          </span>
+        </div>
         <div
           role="progressbar"
           aria-valuenow={Math.round(progresso)}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label={`Progresso de ${nf(1).format(pesoInicial)} kg até a meta de ${nf(1).format(meta.pesoKg)} kg`}
-          className="h-2.5 overflow-hidden rounded-full bg-white/20"
+          aria-label={`Progresso de ${nf(1).format(pesoInicial)} kg até a meta final de ${nf(1).format(metaFinalKg)} kg, com etapa intermediária de ${nf(1).format(etapa.pesoKg)} kg em ${etapa.prazo}`}
+          className="relative h-2.5 rounded-full bg-white/20"
         >
           <div
             className="h-full rounded-full bg-white transition-all"
             style={{ width: `${progresso}%` }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-y-0 w-0.5 -translate-x-1/2 rounded-full bg-emerald-950/50"
+            style={{ left: `${marcadorEtapa}%` }}
           />
         </div>
         <div className="mt-1.5 flex justify-between gap-2 text-[11px] font-medium tabular-nums text-emerald-100 sm:text-xs">
@@ -164,7 +201,7 @@ function CartaoMeta({
           <span className="font-bold text-white">
             {nf(1).format(pesoAtual)} kg · {Math.round(progresso)}%
           </span>
-          <span>{nf(1).format(meta.pesoKg)} kg · meta</span>
+          <span>{nf(1).format(metaFinalKg)} kg · meta final</span>
         </div>
       </div>
     </div>

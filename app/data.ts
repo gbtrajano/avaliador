@@ -280,8 +280,16 @@ export const avaliacoes: { anterior: Avaliacao; atual: Avaliacao } = {
 },
 };
 
-// Meta de peso definida pelo aluno, exibida em destaque no comparativo.
+// Metas de peso definidas pelo aluno, exibidas em destaque no comparativo.
 export const meta = {
-  pesoKg: 60,
-  prazo: "Janeiro de 2027",
+  // Etapa intermediária: aparece como marcador na barra de progresso.
+  intermediaria: {
+    pesoKg: 60,
+    prazo: "Janeiro de 2027",
+    prazoCurto: "Jan/2027",
+  },
+  // Meta principal final.
+  principal: {
+    pesoKg: 80,
+  },
 } as const;
